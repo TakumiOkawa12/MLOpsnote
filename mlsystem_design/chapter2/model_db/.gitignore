@@ -1,0 +1,4 @@
+postgres/*
+.env
+temp/
+.ipynb_checkpoints/
