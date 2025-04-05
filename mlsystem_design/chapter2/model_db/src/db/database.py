@@ -9,7 +9,6 @@ from src.configurations import DBConfigurations
 # DBエンジンのインスタンスを作成
 engine = create_engine(
     DBConfigurations.sql_alchemy_database_url,
-    encoding = "utf-8",
     pool_recycle = 3600,
     echo = False,
 )

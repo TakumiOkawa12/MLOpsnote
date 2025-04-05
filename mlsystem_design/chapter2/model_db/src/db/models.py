@@ -34,7 +34,7 @@ class Project(Base):
 class Model(Base):
     __tablename__ = "models"
 
-    mdoel_id = Column(
+    model_id = Column(
         String(255),
         primary_key = True,
         comment = "主キー",
@@ -57,7 +57,7 @@ class Model(Base):
     )
     created_datetime = Column(
         DateTime(timezone = True),
-        servre_default = current_timestamp(),
+        server_default = current_timestamp(),
         nullable = False
     )
 
