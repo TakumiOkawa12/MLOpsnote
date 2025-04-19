@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+# Deployment: 指定した数のpodを常に動かすように管理するリソース
+kind: Deployment
+metadata:
+  name: model-in-image
+  namespace: model-in-image
+  # key-value形式の識別子。他のリソース（Service や HPAなど）がこのラベルでこのDeploymentに紐づきます。
+  labels:
+    app: model-in-image
+spec:
+  # 起動するPodの数
+  replicas: 4
+  selector:
+    matchLabels:
+      app: model-in-image
+  # 新しく作成されるPodの設定情報
+  template:
+    metadata:
+      labels:
+        app: model-in-image
+    spec:
+      containers:
+        - name: model-in-image
+          image: takumiokawa/ml-system-in-actions:model_in_image_pattern_0.0.1
+          imagePullPolicy: Always # 毎回イメージをプルするポリシー
+          ports:
+            - containerPort: 8000
+          resources:
+            limits:
+              cpu: 500m
+              memory: "300Mi"
+            requests:
+              cpu: 500m
+              memory: "300Mi"
+
+---
+apiVersion: v1
+# 外部・他のPodからモデルAPIにアクセスできるようにする
+kind: Service
+metadata:
+  name: model-in-image
+  namespace: model-in-image
+  labels:
+    app: model-in-image
+spec:
+  ports:
+    - name: rest
+      port: 8000
+      protocol: TCP
+  selector:
+    app: model-in-image
+
+---
+apiVersion: autoscaling/v2
+# CPUの使用状況に応じてPodの数を自動調整する
+kind: HorizontalPodAutoscaler
+metadata:
+  name: model-in-image
+  namespace: model-in-image
+  labels:
+    app: model-in-image
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: model-in-image
+  minReplicas: 3
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 50
